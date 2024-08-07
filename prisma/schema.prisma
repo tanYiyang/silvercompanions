@@ -1,0 +1,40 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+  seed = "prisma/seed.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+enum Role {
+  ELDER
+  VOLUNTEER
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  email   String   @unique
+  username String @unique
+  password String
+  profile Profile?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @unique
+  name String?
+  role Role? 
+  age       Int
+  address   String
+  skills String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
