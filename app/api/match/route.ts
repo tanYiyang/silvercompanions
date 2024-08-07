@@ -102,14 +102,14 @@ export async function GET(req: Request) {
 
     const volunteerData: Volunteer[] = volunteers.map(v => ({
       id: v.id,
-      name: v.name,
+      name: v.name ?? 'NA',
       skills: v.skills ?? [],
       location: v.address ?? '',
     }));
 
     const elderData: Elder[] = elders.map(e => ({
       id: e.id,
-      name: e.name,
+      name: e.name ?? 'NA',
       skills: e.skills ?? [],
       location: e.address ?? '',
     }));
