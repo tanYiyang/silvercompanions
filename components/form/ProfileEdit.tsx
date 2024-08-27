@@ -6,15 +6,21 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '../ui/use-toast';
 import { useRouter } from 'next/navigation';
 
-// Schema for validating profile information
+// schema for validating user profile
 const ProfileFormSchema = z.object({
-  age: z.number().min(1, 'Please enter a valid age.').max(150, 'Please enter a valid age.'),
+  firstName: z.string().min(1, 'First name is required.'),
+  lastName: z.string().min(1, 'Last name is required.'),
+  phoneNumber: z.string().min(1, 'Phone number is required.'),
+  dateOfBirth: z.string().min(1, 'Date of birth is required.'),
   address: z.string().min(1, 'Please enter an address.'),
   skills: z.array(z.string()).min(1, 'Please select at least one skill.'),
   role: z.enum(['ELDER', 'VOLUNTEER']),
+  availability: z.array(z.string()).min(1, 'Please select at least one available day.'),
 });
 
 type FormData = z.infer<typeof ProfileFormSchema>;
+
+const getAudioUrl = (skill: string) => `/audios/${skill.toLowerCase()}.m4a`;
 
 const ProfileForm = () => {
   const data = useState<FormData>()
@@ -22,34 +28,44 @@ const ProfileForm = () => {
   const { toast } = useToast();
   const [userProfile, setuserProfile] = useState<any>(null);
 
-  const { handleSubmit, register, setValue, formState: { errors } } = useForm<FormData>({
+  const { handleSubmit, register, setValue, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(ProfileFormSchema),
   });
-  
+
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
 
   const handleSkillChange = (skill: string) => {
     setSelectedSkills((prev) => {
-      const newSelectedSkills = prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill];
-      setValue('skills', newSelectedSkills);
-      return newSelectedSkills;
+      if (prev.includes(skill)) {
+        return prev.filter(s => s !== skill);
+      } else {
+        const newSelectedSkills = [...prev, skill];
+        //plays the audio onclick
+        const audio = new Audio(getAudioUrl(skill));
+        audio.play();
+        setValue('skills', newSelectedSkills);
+        return newSelectedSkills
+      }
     });
   };
 
   const onSubmit: SubmitHandler<FormData> = async data => {
     try {
+      const [year, month, day] = data.dateOfBirth.split('-');
+      const formattedDateOfBirth = `${day}/${month}/${year}`;
+
+      const profileData = {
+        ...data,
+        dateOfBirth: formattedDateOfBirth, 
+      };
+
       const response = await fetch('/api/profileEdit', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        
-        body: JSON.stringify({
-          age: data.age,
-          address: data.address,
-          skills: data.skills,
-          role: data.role,
-        }),
+
+        body: JSON.stringify(profileData),
       });
 
       if (response.ok) {
@@ -67,27 +83,36 @@ const ProfileForm = () => {
     } catch (error) {
       toast({
         title: 'Profile Update Error',
-        description: 'Failed to update profile. Please try again later.',
+        description: 'An error has occured while updating profile. Please try again.',
         variant: 'destructive',
       });
     }
   };
-  const skillOptions = ['Cooking', 'Shopping', 'Gardening', 'Painting', 'Fishing', 'Knitting', 'Woodworking', 'Photography'];
+  const skillOptions = ['Cooking', 'Shopping', 'Gardening', 'Painting', 'Photography', 'Knitting'];
+  const availabilityOptions = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
+  const selectedRole = watch('role', 'ELDER');
   useEffect(() => {
-    // Fetch the existing profile data
+
     const fetchProfileData = async () => {
       try {
         const response = await fetch('/api/profile');
         const profileData = await response.json();
 
         if (response.ok) {
-          // Populate the form with the fetched data
-          setValue('age', profileData.age);
+          //conversion from string to date format
+          const [day, month, year] = profileData.dateOfBirth.split('/');
+          const formattedDate = new Date(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+
+          setValue('firstName', profileData.firstName);
+          setValue('lastName', profileData.lastName);
+          setValue('phoneNumber', profileData.phoneNumber);
+          setValue('dateOfBirth', formattedDate.toISOString().split('T')[0]);
           setValue('address', profileData.address);
           setSelectedSkills(profileData.skills || []);
           setValue('skills', profileData.skills || []);
           setValue('role', profileData.role);
+          setValue('availability', profileData.availability || []);
           setuserProfile(profileData);
         } else {
           toast({
@@ -99,7 +124,7 @@ const ProfileForm = () => {
       } catch (error) {
         toast({
           title: 'Error',
-          description: 'An error occurred while fetching profile data.',
+          description: 'Failed to fetch profile data.',
           variant: 'destructive',
         });
       }
@@ -107,21 +132,60 @@ const ProfileForm = () => {
 
     fetchProfileData();
   }, [setValue, toast]);
-  
-  
+
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label htmlFor="age" className="block text-sm font-medium text-gray-700">
-          Age
+        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+          First Name
         </label>
         <input
-          type="number"
-          id="age"
-          {...register('age', {valueAsNumber: true})}
+          type="text"
+          id="firstName"
+          {...register('firstName')}
           className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
         />
-        {errors.age?.message && <p className="text-sm text-red-400">{errors.age.message}</p>}
+        {errors.firstName?.message && <p className="text-sm text-red-400">{errors.firstName.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+          Last Name
+        </label>
+        <input
+          type="text"
+          id="lastName"
+          {...register('lastName')}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        {errors.lastName?.message && <p className="text-sm text-red-400">{errors.lastName.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+          Phone Number
+        </label>
+        <input
+          type="text"
+          id="phoneNumber"
+          {...register('phoneNumber')}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        {errors.phoneNumber?.message && <p className="text-sm text-red-400">{errors.phoneNumber.message}</p>}
+      </div>
+
+      <div>
+        <label htmlFor="dateOfBirth" className="block text-sm font-medium text-gray-700">
+          Date of Birth
+        </label>
+        <input
+          type="date"
+          id="dateOfBirth"
+          {...register('dateOfBirth')}
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+        />
+        {errors.dateOfBirth?.message && <p className="text-sm text-red-400">{errors.dateOfBirth.message}</p>}
       </div>
 
       <div>
@@ -139,9 +203,9 @@ const ProfileForm = () => {
 
       <div>
         <label htmlFor="skills" className="block text-sm font-medium text-gray-700 pb-4">
-        { !userProfile || userProfile.role === 'ELDER' ? 'What skills are you looking for?' : 'Skills'}
+          {!userProfile || userProfile.role === 'ELDER' ? 'What skills are you looking for?' : 'Skills'}
         </label>
-        <div className="space-y-2 columns-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
           {skillOptions.map((skill) => (
             <div key={skill} className="flex items-center">
               <input
@@ -176,6 +240,31 @@ const ProfileForm = () => {
         {errors.role?.message && <p className="text-sm text-red-400">{errors.role.message}</p>}
       </div>
 
+      {selectedRole === 'VOLUNTEER' && (
+        <div>
+          <label htmlFor="availability" className="block text-sm font-medium text-gray-700 pb-4">
+            Availability
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {availabilityOptions.map((day) => (
+              <div key={day} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={day}
+                  value={day}
+                  {...register('availability')}
+                  className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                />
+                <label htmlFor={day} className="ml-2 block text-sm text-gray-900">
+                  {day}
+                </label>
+              </div>
+            ))}
+          </div>
+          {errors.availability?.message && <p className="text-sm text-red-400">{errors.availability.message}</p>}
+        </div>
+      )}
+
       <div>
         <button
           type="submit"
@@ -184,6 +273,7 @@ const ProfileForm = () => {
           Save
         </button>
       </div>
+
     </form>
   );
 };

@@ -6,7 +6,7 @@ import * as z from "zod";
 // schema for validating user registration
 const UserSchema = z.object({
     username: z.string().min(1, 'Please enter a username.').max(50),
-    email: z.string().min(1, 'Please enter a email.').email('Invalid email'),
+    email: z.string().min(1, 'Please enter a email.').email('Invalid email.'),
     password: z
       .string()
       .min(1, 'Please enter a password.')
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         })
 
         if (existingUser) {
-            return NextResponse.json({ user: null, message: "User already exists."})
+            return NextResponse.json({ user: null, message: "User already exists"})
         }
 
         const encPassword = await hash(password, 15);
@@ -40,8 +40,8 @@ export async function POST(req: Request) {
                 email
             }
         });
-        return NextResponse.json({user: newUser, message: "User creation successful."});
+        return NextResponse.json({user: newUser, message: "User creation successful"});
     } catch(err) {
-        return NextResponse.json({message: "User creation failed."});
+        return NextResponse.json({message: "User creation failed"});
     }
 }

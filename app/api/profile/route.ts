@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
 export async function GET(req: Request) {
-  // Get the session to identify the user
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -24,6 +23,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json(profile);
   } catch (error) {
-    return NextResponse.json({ message: 'An error occurred while fetching the profile', error });
+    return NextResponse.json({ message: 'An error has occurred while fetching the profile', error });
   }
 }

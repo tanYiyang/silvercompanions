@@ -9,7 +9,7 @@ import { useToast } from '../ui/use-toast';
 // schema for validating user registration
 const SignUpFormSchema = z.object({
     username: z.string().min(1, 'Please enter a username.').max(50),
-    email: z.string().min(1, 'Please enter a email.').email('Invalid email'),
+    email: z.string().min(1, 'Please enter a email.').email('Invalid email.'),
     password: z
       .string()
       .min(1, 'Please enter a password.')

@@ -8,7 +8,7 @@ const page = async () => {
   if (session?.user) {
     return (
         <div className="w-1/2 h-5/6">
-        <div className="text-4xl font-bold">{session?.user.username} Profile</div>
+        <div className="text-4xl font-bold">My Profile</div>
         <div className="pt-5"> 
         <ProfileForm/>
         </div>

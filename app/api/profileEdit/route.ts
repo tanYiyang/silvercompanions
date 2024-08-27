@@ -6,10 +6,14 @@ import { getServerSession } from 'next-auth';
 
 // schema for validating user role and skills selection
 const ProfileFormSchema = z.object({
-  age: z.number().min(1, 'Please enter a valid age.').max(150, 'Please enter a valid age.'),
+  firstName: z.string().min(1, 'First name is required.'),
+  lastName: z.string().min(1, 'Last name is required.'),
+  phoneNumber: z.string().min(1, 'Phone number is required.'),
+  dateOfBirth: z.string().min(1, 'Date of birth is required.'),
   address: z.string().min(1, 'Please enter an address.'),
   skills: z.array(z.string()).min(1, 'Please select at least one skill.'),
   role: z.enum(['ELDER', 'VOLUNTEER']),
+  availability: z.array(z.string()).min(1, 'Please select at least one available day.'),
 });
 
 export async function PUT(req: Request) {
@@ -19,20 +23,23 @@ export async function PUT(req: Request) {
     if (!session) {
       return NextResponse.redirect('/login');
     }
-    
-    
+  
       const body = await req.json();
-      const { age, address, skills, role } = ProfileFormSchema.parse(body);
+      const { firstName, lastName, phoneNumber, dateOfBirth, address, skills, availability, role } = ProfileFormSchema.parse(body);
       const sessionId = Number(session.user.id)
       const existingProfile = await db.profile.findFirst({
         where: {userId: sessionId}
       })
   
     const profileData = {
-      age: Number(age),
+      firstName,
+      lastName,
+      phoneNumber,
+      dateOfBirth,
       address,
       skills,
-      role
+      availability,
+      role,
     }
 
     let user;
@@ -54,7 +61,7 @@ export async function PUT(req: Request) {
     
     return NextResponse.json(user);
 } catch(err) {
-  return NextResponse.json({message: "Profile update failed."});
+  return NextResponse.json({message: "Profile update failed"});
 }
   }
 

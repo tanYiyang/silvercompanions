@@ -7,6 +7,7 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-6">Silver Companions</h1>
       <div className="flex flex-col md:flex-row items-center mb-10 max-w-4xl">
         <div className="w-1/2 flex justify-center mb-4 md:mr-8">
+        {/* image sourced from: https://www.freepik.com/free-photo/person-helping-their-elder-neighbour_21079977.htm#fromView=search&page=2&position=19&uuid=db8e78c7-a0f7-4d5e-bb81-b40cbd7a18cc */}
           <Image 
             src="/images/volunteer.jpg" 
             alt="Volunteer" 
@@ -32,7 +33,7 @@ export default function Home() {
       <h1 className="text-xl font-semibold mb-6">How It Works</h1>
       <p className="md:text-xl text-gray-700 mb-4 text-center text-sm mx-2">1. Click on the <b>Sign Up</b> button and fill up the form accordingly.</p>
       <p className="md:text-xl text-gray-700 mb-4 text-center text-sm mx-2">2. Once you have logged in, select your role and fill up your personal particulars and preferences.</p>
-      <p className="md:text-xl text-gray-700 mb-4 text-center text-sm mx-2">3. Click on <b>Matches</b> to find the details of your volunteer or elder. </p>
+      <p className="md:text-xl text-gray-700 mb-4 text-center text-sm mx-2">3. Click on <b>Matches</b> to see your matched volunteer or elder! </p>
       </div>
 
     </div>

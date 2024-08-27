@@ -3,8 +3,9 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const skills = ['Cooking', 'Shopping', 'Gardening', 'Painting', 'Fishing', 'Knitting', 'Woodworking', 'Photography'];
+const skills = ['Cooking', 'Shopping', 'Gardening', 'Painting', 'Photography', 'Knitting'];
 const locations = ['Clementi', 'Yew Tee', 'Ang Mo Kio', 'Tampines', 'Bukit Batok', 'Jurong East', 'Woodlands', 'Bedok'];
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 async function main() {
   
@@ -14,6 +15,7 @@ async function main() {
     
     const randomSkills = skills.sort(() => 0.5 - Math.random()).slice(0, 3);
     const randomLocations = locations.sort(() => 0.5 - Math.random()).slice(0, 1);
+    const randomDays = days.sort(() => 0.5 - Math.random()).slice(0, 1);
 
     const volunteer = prisma.user.create({
       data: {
@@ -22,11 +24,14 @@ async function main() {
         password: hashedPassword,
         profile: {
           create: {
-            name: `Volunteer ${i}`,
-            role: Role.VOLUNTEER,
-            age: 25 + i,
+            firstName: `Volunteer ${i}`,
+            lastName: 'Valthier',
+            phoneNumber: '12345678',
+            dateOfBirth: '01/01/2000',
             address: `${randomLocations}`,
             skills: randomSkills,
+            role: Role.VOLUNTEER,
+            availability: randomDays
           },
         },
       },
@@ -46,11 +51,13 @@ async function main() {
         password: hashedPassword,
         profile: {
           create: {
-            name: `Elder ${i}`,
-            role: Role.ELDER,
-            age: 65 + i,
+            firstName: `Elder ${i}`,
+            lastName: 'Evans',
+            phoneNumber: '87654321',
+            dateOfBirth: '01/01/1990',
             address: `${randomLocations}`,
             skills: randomSkills,
+            role: Role.ELDER
           },
         },
       },

@@ -1,30 +1,25 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { FaPhoneAlt } from "react-icons/fa";
+import { FaCalendarAlt } from "react-icons/fa";
+import { FaSearchLocation } from "react-icons/fa";
 
 interface Match {
-  elderId: number;
-  elderName: string;
   volunteerId: number;
   volunteerName: string;
+  volunteerPhone: string;
+  volunteerAvailability: string;
+  elderId: number;
+  elderName: string;
+  elderPhone: string;
+  elderAddress: string;
 }
 
 const Matches = () => {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [userMatches, setUserMatches] = useState<Match[]>([]);
   const { data: session } = useSession();
   const [userRole, setUserRole] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchMatches = async () => {
-      const response = await fetch('/api/match', {
-        method: 'GET',
-      });
-      const matchData = await response.json();
-      setMatches(matchData);
-    };
-    fetchMatches();
-  }, []);
 
   useEffect(() => {
     const fetchUserRole = async () => {
@@ -41,34 +36,61 @@ const Matches = () => {
   }, [session]);
 
   useEffect(() => {
-    if (session?.user && userRole) {
-      const userId = session.user.id;
-
-      if (userRole === 'ELDER') {
-        setUserMatches(matches.filter(match => match.elderId === Number(userId)));
-      } else if (userRole === 'VOLUNTEER') {
-        setUserMatches(matches.filter(match => match.volunteerId === Number(userId)));
+    const fetchMatches = async () => {
+      if (session?.user) {
+        const response = await fetch('/api/match', {
+          method: 'GET',
+        });
+        if (response.ok) {
+          const matchData: Match[] = await response.json();
+          setMatches(matchData);
+        }
       }
-    }
-  }, [matches, session, userRole]);
+    };
+    fetchMatches();
+  }, [session]);
 
   return (
     <div>
-      <ul>
-        {userMatches.length > 0 ? (
-          userMatches.map((match, index) => (
-            <li key={index}>
-              {userRole === 'ELDER' ? (
-                <>Volunteer {match.volunteerName}</>
+      {matches.length > 0 ? (
+        <ul className="divide-y divide-gray-200">
+          {matches.map(match => (
+            <li key={match.elderId || match.volunteerId} className="py-4 ">
+              {userRole === 'VOLUNTEER' ? (
+                <div className="flex flex-col">
+                  <p className="text-lg font-medium text-indigo-600 truncate">{match.elderName}</p>
+                  <p className="mt-2 flex items-center text-sm text-gray-500">
+                  <FaPhoneAlt className='mr-2'/>
+                    Phone: {match.elderPhone}
+                  </p>
+                  <p className="mt-2 flex items-center text-sm text-gray-500">
+                  <FaSearchLocation className='mr-2'/>
+                    Address: {match.elderAddress}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">Contact them to schedule a session!</p>
+                </div>
               ) : (
-                <>Elder {match.elderName}</>
+                <div className="flex flex-col">
+                  <p className="text-lg font-medium text-indigo-600">{match.volunteerName}</p>
+                  <p className="mt-2 flex items-center text-sm text-gray-500">
+                  <FaPhoneAlt className='mr-2'/>
+                    Phone: {match.volunteerPhone}
+                  </p>
+                  <p className="mt-1 flex items-center text-sm text-gray-500">
+                    <FaCalendarAlt className='mr-2'/>
+                    Availability: {match.volunteerAvailability}
+                  </p>
+                  <p className="mt-2 text-sm text-gray-500">Contact them to schedule a session!</p>
+                </div>
               )}
             </li>
-          ))
-        ) : (
-          <li>No match yet</li>
-        )}
-      </ul>
+          ))}
+        </ul>
+      ) : (
+        <div className="px-4 py-4 sm:px-6 text-center">
+          <p className="text-sm text-gray-500">No match yet</p>
+        </div>
+      )}
     </div>
   );
 };
