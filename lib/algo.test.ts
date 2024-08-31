@@ -13,17 +13,17 @@ describe('Gale-Shapley Algorithm Tests', () => {
   });
 
   test('Availability Test: The number of elders that a volunteer can be matched with should be less than or equal than their number of available days, while still respecting the preferences.', async () => {
-    mockDistancematrix.mockImplementationOnce(({ params }) => {
+    mockDistancematrix.mockImplementationOnce(({}) => {
       return Promise.resolve({
         data: {
-          destination_addresses: ["Bedok, Singapore", "Jurong East, Singapore", "Bedok, Singapore"],
+          destination_addresses: ["Jurong East, Singapore", "Jurong East, Singapore", "Bedok, Singapore"],
           origin_addresses: ["Bedok, Singapore"],
           rows: [
             {
               elements: [
                 {
-                  distance: { text: "1.0 km", value: 1000 },
-                  duration: { text: "5 mins", value: 100 },
+                  distance: { text: "31.6 km", value: 31635 },
+                  duration: { text: "1 hour 7 mins", value: 4021 },
                   status: "OK"
                 },
                 {
@@ -48,20 +48,20 @@ describe('Gale-Shapley Algorithm Tests', () => {
       { id: 1, skills: ['cooking', 'gardening'], location: 'Bedok, Singapore', availability: ['Monday', 'Tuesday'] },
     ];
     const elders: Elder[] = [
-      { id: 1, skills: ['gardening'], location: 'Bedok, Singapore' },
-      { id: 2, skills: ['cooking'], location: 'Jurong East, Singapore' },
+      { id: 1, skills: ['gardening'], location: 'Jurong East, Singapore' },
+      { id: 2, skills: ['cooking', 'gardening'], location: 'Jurong East, Singapore' },
       { id: 3, skills: ['cooking'], location: 'Bedok, Singapore' },
     ];
 
-    const travelTimeMap = await getTravelTimes(volunteers, elders);
+    const travelTimeMap = await getTravelTimes(volunteers, elders);   
     const matches = await galeShapley(volunteers, elders, travelTimeMap);
     const matchedElders = matches[1].map(elder => elder.id);
     
-    expect(matchedElders).toEqual(expect.arrayContaining([1, 3])); //volunteer 1 should be matched with elder 1 and elder 3 
+    expect(matchedElders).toEqual(expect.arrayContaining([2, 3])); //volunteer 1 should be matched with elder 2 and elder 3
   });
 
   test('Preference Priority Test: The priority in the matching should be skill preferences, not location.', async () => {
-    mockDistancematrix.mockImplementationOnce(({ params }) => {
+    mockDistancematrix.mockImplementationOnce(({}) => {
       return Promise.resolve({
         data: {
           destination_addresses: ["Jurong East, Singapore"],
@@ -93,7 +93,7 @@ describe('Gale-Shapley Algorithm Tests', () => {
 
     const volunteers: Volunteer[] = [
       { id: 1, skills: ['cooking', 'gardening'], location: 'Tampines, Singapore', availability: ['Wednesday'] },
-      { id: 2, skills: ['cooking'], location: 'Jurong East, Singapore', availability: ['Thursday'] },
+      { id: 2, skills: ['cooking', 'photography', 'shopping'], location: 'Jurong East, Singapore', availability: ['Thursday'] },
     ];
     const elders: Elder[] = [
       { id: 1, skills: ['cooking', 'gardening'], location: 'Jurong East, Singapore' },
@@ -107,7 +107,7 @@ describe('Gale-Shapley Algorithm Tests', () => {
   });
 
   test('Stable Matching Test: The matches produces are stable, whereby no pair of a volunteer and elder would prefer each other over their current matches.', async () => {
-    mockDistancematrix.mockImplementationOnce(({ params }) => {
+    mockDistancematrix.mockImplementationOnce(({}) => {
       return Promise.resolve({
         data: {
           destination_addresses: ["Jurong East, Singapore", "Bedok, Singapore", "Tampines, Singapore"],
@@ -177,19 +177,19 @@ describe('Gale-Shapley Algorithm Tests', () => {
     });
 
     const volunteers: Volunteer[] = [
-      { id: 1, skills: ['gardening'], location: 'Bedok, Singapore', availability: ['Monday'] },
-      { id: 2, skills: ['cooking'], location: 'Jurong East, Singapore', availability: ['Tuesday'] },
+      { id: 1, skills: ['shopping'], location: 'Bedok, Singapore', availability: ['Monday'] },
+      { id: 2, skills: ['photography'], location: 'Jurong East, Singapore', availability: ['Tuesday'] },
       { id: 3, skills: ['gardening', 'cooking'], location: 'Tampines, Singapore', availability: ['Wednesday'] },
     ];
 
     const elders: Elder[] = [
-      { id: 1, skills: ['gardening'], location: 'Jurong East, Singapore' },
-      { id: 2, skills: ['cooking'], location: 'Bedok, Singapore' },
-      { id: 3, skills: ['cooking'], location: 'Tampines, Singapore' },
+      { id: 1, skills: ['gardening', 'cooking'], location: 'Jurong East, Singapore' },
+      { id: 2, skills: ['photography'], location: 'Bedok, Singapore' },
+      { id: 3, skills: ['shopping'], location: 'Tampines, Singapore' },
     ];    
     const travelTimeMap = await getTravelTimes(volunteers, elders);
     const matches = await galeShapley(volunteers, elders, travelTimeMap);
-    
+
     // check for any blocking pairs, if no blocks pairs, it means a stable matching has been achieved
     
 

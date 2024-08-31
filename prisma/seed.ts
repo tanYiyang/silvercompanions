@@ -15,7 +15,7 @@ async function main() {
     
     const randomSkills = skills.sort(() => 0.5 - Math.random()).slice(0, 3);
     const randomLocations = locations.sort(() => 0.5 - Math.random()).slice(0, 1);
-    const randomDays = days.sort(() => 0.5 - Math.random()).slice(0, 1);
+    const randomDays = days.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 7) + 1);
 
     const volunteer = prisma.user.create({
       data: {

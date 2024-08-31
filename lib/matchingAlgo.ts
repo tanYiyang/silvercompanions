@@ -34,6 +34,7 @@ export async function getTravelTimes(volunteers: Volunteer[], elders: Elder[]): 
     const travelTimes = await getBatchTravelTime(volunteerLocations, elderLocations);
 
     const travelTimeMap: { [key: string]: number } = {};
+
     volunteers.forEach((volunteer, vIndex) => {
       elders.forEach((elder, eIndex) => {
         const key = `${volunteer.id}-${elder.id}`;

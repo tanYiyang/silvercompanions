@@ -49,9 +49,11 @@ export async function GET(req: Request) {
       skills: e.skills ?? [],
       location: e.address ?? '',
     }));
+    
     const travelTimeMap = await getTravelTimes(volunteerData, elderData);
 
     const matches = await galeShapley(volunteerData, elderData, travelTimeMap);
+
     let matchResults: any[] = [];
 
 
