@@ -20,7 +20,7 @@ const ProfileFormSchema = z.object({
 
 type FormData = z.infer<typeof ProfileFormSchema>;
 
-const getAudioUrl = (skill: string) => `/audios/${skill.toLowerCase()}.m4a`;
+const getAudioUrl = (skill: string) => `/audios/${skill}.m4a`;
 
 const ProfileForm = () => {
   const data = useState<FormData>()
